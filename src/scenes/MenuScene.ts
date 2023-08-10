@@ -20,8 +20,21 @@ export default class MenuScene extends Phaser.Scene {
 
     create() {
         console.log('menu.create')
-        this.add.image(800, 1000, 'background');
-        this.load.image('playButton', '../assets/play_button.png');
+        this.add.image(400, 300, 'background');
+        const playButton = document.getElementById('playButton') as HTMLButtonElement;
+
+        // Create a Phaser Text object based on the HTML button
+        this.playButton = this.add.text(playButton.offsetLeft, playButton.offsetTop, playButton.innerText, { color: '#0f0' })
+            .setInteractive()
+            .on('pointerdown', () => this.startGame());
+
+
+        // Center the play button
+        Phaser.Display.Align.In.Center(
+            this.playButton,
+            this.add.zone(400, 300, 800, 600)
+        );
+
 
         // // Create the play button using the loaded image
         // this.playButton = this.add.image(400, 300, 'playButton').setInteractive();
@@ -31,14 +44,14 @@ export default class MenuScene extends Phaser.Scene {
 
 
         // Create the text for the play button
-        this.playButton = this.add.text(1400, 1300, 'Play Game', { color: '#0f0' })
+        this.playButton = this.add.text(400, 300, 'Play Game', { color: '#0f0' })
             .setInteractive()    // Makes the text clickable
             .on('pointerdown', () => this.startGame());   // Go to startGame() when the text is clicked
 
         // Center the play button
         Phaser.Display.Align.In.Center(
             this.playButton,
-            this.add.zone(1400, 1300, 1800, 1600)
+            this.add.zone(400, 300, 800, 600)
         );
     }
 
@@ -48,6 +61,9 @@ export default class MenuScene extends Phaser.Scene {
 
     // Function to start the game
     startGame() {
+
+        console.log('startGame')
+
         this.scene.start('GameScene');   // Switch the scene to GameScene
     }
 }

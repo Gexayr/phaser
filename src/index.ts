@@ -8,8 +8,8 @@ import GameOverScene from "./scenes/GameOverScene";
 
 const config: Phaser.Types.Core.GameConfig = {
     title: "Zuma Game",
-    width: 1800,
-    height: 1600,
+    width: 800,
+    height: 600,
     type: Phaser.AUTO,
     parent: "game",
     scene: [PreloadScene, MenuScene, GameScene, GameOverScene],
