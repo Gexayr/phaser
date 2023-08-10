@@ -64,7 +64,7 @@ export default class GameScene extends Phaser.Scene {
         const angle = Phaser.Math.Angle.Between(this.cannon.x, this.cannon.y, pointer.x, pointer.y);
 
         // Rotate the cannon towards the pointer
-        this.cannon.setAngle(Phaser.Math.RadToDeg(angle + 90));
+        this.cannon.setAngle(Phaser.Math.RadToDeg(angle - 1.5708));
 
         // Shoot balls if the cooldown time has passed and the pointer is pressed
         if (pointer.isDown && this.time.now > this.lastShotTime + this.cannonCooldown) {
@@ -83,7 +83,7 @@ export default class GameScene extends Phaser.Scene {
         const ball = this.physics.add.sprite(this.cannon.x, this.cannon.y, 'ball');
 
         // Set the velocity of the ball to launch it in the direction of the cannon's angle
-        const angle = Phaser.Math.DegToRad(this.cannon.angle - 90);
+        const angle = Phaser.Math.DegToRad(this.cannon.angle + 90);
         const velocity = new Phaser.Math.Vector2(Math.cos(angle), Math.sin(angle)).normalize().scale(500);
 
         // // Set the velocity of the ball to launch it in the direction of the cannon's angle
@@ -108,9 +108,16 @@ export default class GameScene extends Phaser.Scene {
         const enemyBall = this.physics.add.sprite(x, y, 'enemyBall');
         enemyBall.setScale(0.2); // Adjust the scale value to make the enemy balls smaller
 
+        // Enable physics for the enemy ball
+        this.physics.world.enable(enemyBall);
+
+        // Set the velocity of the enemy ball to move towards the center of the screen
         const targetX = this.scale.width / 2;
         const targetY = this.scale.height / 2;
+        const velocity = new Phaser.Math.Vector2(targetX - x, targetY - y).normalize().scale(100);
+        enemyBall.body.setVelocity(velocity.x, velocity.y);
 
+        this.enemyBalls.push(enemyBall);
         // const velocity = new Phaser.Math.Vector2(targetX - x, targetY - y).normalize().scale(100);
         // enemyBall.setVelocity(velocity.x, velocity.y);
 
@@ -121,11 +128,11 @@ export default class GameScene extends Phaser.Scene {
         // const y = Math.sin(angle) * radius + this.scale.height / 2; // Calculate the y-coordinate of the enemy ball
         // const enemyBall = this.physics.add.sprite(x, y, 'enemyBall');
 
-         // Set the velocity of the enemy ball to move towards the center of the spiral
-         const velocity = new Phaser.Math.Vector2(this.scale.width / 2 - x, this.scale.height / 2 - y).normalize().scale(100);
-         enemyBall.body.setVelocity(velocity.x, velocity.y);
 
-         this.enemyBalls.push(enemyBall);
+         // const velocity = new Phaser.Math.Vector2(this.scale.width / 2 - x, this.scale.height / 2 - y).normalize().scale(100);
+         // enemyBall.body.setVelocity(velocity.x, velocity.y);
+
+         // this.enemyBalls.push(enemyBall);
      }
 
 
@@ -168,4 +175,38 @@ export default class GameScene extends Phaser.Scene {
         }
     }
 
+
+
+    // they distance :)
+    // handleCollision(shotBall: Phaser.Physics.Arcade.Sprite, enemyBall: Phaser.Physics.Arcade.Sprite) {
+    //     const distance = Phaser.Math.Distance.Between(shotBall.x, shotBall.y, enemyBall.x, enemyBall.y);
+    //     const threshold = (shotBall.displayWidth + enemyBall.displayWidth) * 0.5;
+    //
+    //     if (distance <= threshold) {
+    //         // Remove the collided balls from their respective arrays and from the scene
+    //         shotBall.destroy();
+    //         enemyBall.destroy();
+    //         const shotBallIndex = this.shotBalls.indexOf(shotBall);
+    //         if (shotBallIndex !== -1) {
+    //             this.shotBalls.splice(shotBallIndex, 1);
+    //         }
+    //         const enemyBallIndex = this.enemyBalls.indexOf(enemyBall);
+    //         if (enemyBallIndex !== -1)
+    //         {
+    //             this.enemyBalls.splice(enemyBallIndex, 1);
+    //         }
+    //     }
+    // }
+
+    // handleCollision(shotBall: Phaser.Physics.Arcade.Sprite, enemyBall: Phaser.Physics.Arcade.Sprite) {
+    //     const overlap = this.physics.overlap(shotBall, enemyBall);
+    //
+    //     if (overlap) {
+    //         shotBall.destroy();
+    //         enemyBall.destroy();
+    //
+    //         this.shotBalls = this.shotBalls.filter(ball => ball !== shotBall);
+    //         this.enemyBalls = this.enemyBalls.filter(ball => ball !== enemyBall);
+    //     }
+    // }
 }
