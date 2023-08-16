@@ -15,7 +15,8 @@
   },
   "scripts": {
     "build": "webpack --progress",
-    "start": "webpack-dev-server --open --port 8080"
+    "start": "webpack-dev-server --open --port 8080",
+    "go": "webpack --progress && webpack-dev-server --open --port 8080"
   },
   "author": "",
   "license": "ISC"

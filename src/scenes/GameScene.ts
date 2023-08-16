@@ -10,6 +10,7 @@ export default class GameScene extends Phaser.Scene {
     private cannon: Phaser.Physics.Arcade.Sprite;
     private enemyBalls: Phaser.Physics.Arcade.Sprite[] = [];
     private shotBalls: Phaser.GameObjects.Sprite[] = [];
+    private pathPoints: { x: number, y: number }[] = [];
 
     cannonRotationSpeed: number = 0.02;
     cannonCooldown: number = 500;
@@ -38,9 +39,58 @@ export default class GameScene extends Phaser.Scene {
         const centerX = this.scale.width * 0.5;
         const centerY = this.scale.height * 0.5;
 
-
+        // Load and display the background image
         const background = this.add.image(0, 0, 'background').setOrigin(0, 0);
         background.setScale(this.scale.width / background.width, this.scale.height / background.height);
+
+        // Create a graphics object to draw the path
+        const graphics = this.add.graphics();
+
+        // Set the line style for the path
+        const lineColor = 0xf412900;
+        const lineWidth = 10;
+        graphics.lineStyle(lineWidth, lineColor);
+
+
+        // Define the points that make up the path
+        this.pathPoints = [
+            { x: 100, y: 50 },
+            { x: 600, y: 50 },
+            { x: 600, y: 500 },
+            { x: 200, y: 500 },
+            { x: 200, y: 150 },
+            { x: 500, y: 150 },
+        ];
+
+
+
+        for (let i = 0; i < this.pathPoints.length; i++) {
+            const {x, y} = this.pathPoints[i];
+            if (i === 0) {
+                graphics.moveTo(x, y);
+            } else {
+                graphics.lineTo(x, y);
+            }
+        }
+
+        //
+        //
+        // // Move the graphics object to the first point of the path
+        // const startPoint = pathPoints[0];
+        // graphics.moveTo(startPoint.x, startPoint.y);
+        //
+        // // Draw lines connecting the subsequent points of the path
+        // for (let i = 1; i < pathPoints.length; i++)
+        // {
+        //     const point = pathPoints[i];
+        //     graphics.lineTo(point.x, point.y);
+        // }
+        //
+        // // Close the path by drawing a line back to the start point
+        // graphics.closePath();
+
+        // Render the graphics object on top of the background image
+        graphics.strokePath();
 
 
         this.cannon = this.physics.add.sprite(centerX, centerY, 'cannon');
@@ -81,7 +131,8 @@ export default class GameScene extends Phaser.Scene {
         // Create a ball sprite at the position of the cannon
         // const ball = this.add.sprite(this.cannon.x, this.cannon.y, 'ball');
         const ball = this.physics.add.sprite(this.cannon.x, this.cannon.y, 'ball');
-
+        // Enable physics for the shot ball
+        this.physics.world.enable(ball);
         // Set the velocity of the ball to launch it in the direction of the cannon's angle
         const angle = Phaser.Math.DegToRad(this.cannon.angle + 90);
         const velocity = new Phaser.Math.Vector2(Math.cos(angle), Math.sin(angle)).normalize().scale(500);
@@ -103,42 +154,37 @@ export default class GameScene extends Phaser.Scene {
     }
 
     generateEnemyBall() {
-        const x = 0; // Set the initial x-position to the left edge of the screen
-        const y = 0; // Set the initial y-position to the top edge of the screen
-        const enemyBall = this.physics.add.sprite(x, y, 'enemyBall');
+        const startPoint = this.pathPoints[0]; // Set the initial point of the path
+        const enemyBall = this.physics.add.sprite(startPoint.x, startPoint.y, 'enemyBall');
         enemyBall.setScale(0.2); // Adjust the scale value to make the enemy balls smaller
 
-        // Enable physics for the enemy ball
-        this.physics.world.enable(enemyBall);
+        this.physics.world.on('worldstep', () => {
+            const targetPoint = this.pathPoints[currentPathIndex]; // Retrieve the target path point
+            const direction = new Phaser.Math.Vector2(targetPoint.x - enemyBall.x, targetPoint.y - enemyBall.y);
+            const distance = direction.length();
 
-        // Set the velocity of the enemy ball to move towards the center of the screen
-        const targetX = this.scale.width / 2;
-        const targetY = this.scale.height / 2;
-        const velocity = new Phaser.Math.Vector2(targetX - x, targetY - y).normalize().scale(100);
-        enemyBall.body.setVelocity(velocity.x, velocity.y);
+            const speed = 50; // Adjust the speed of the enemy ball
+
+            if (distance < speed) {
+                currentPathIndex++;
+                if (currentPathIndex >= this.pathPoints.length) {
+                    enemyBall.destroy();
+                    return; // Abort if reached the end of the path
+                }
+            }
+
+            direction.normalize();
+            const velocityX = direction.x * speed;
+            const velocityY = direction.y * speed;
+
+            enemyBall.setVelocity(velocityX, velocityY);
+        });
+
+        let currentPathIndex = 1; // Start at index 1 to move towards the next path point
 
         this.enemyBalls.push(enemyBall);
-        // const velocity = new Phaser.Math.Vector2(targetX - x, targetY - y).normalize().scale(100);
-        // enemyBall.setVelocity(velocity.x, velocity.y);
-
-        //
-        // const angle = (this.enemyBalls.length + 1) * 0.1; // Adjust the angle to change the spiral pattern
-        // const radius = 100; // Adjust the radius of the spiral
-        // const x = Math.cos(angle) * radius + this.scale.width / 2; // Calculate the x-coordinate of the enemy ball
-        // const y = Math.sin(angle) * radius + this.scale.height / 2; // Calculate the y-coordinate of the enemy ball
-        // const enemyBall = this.physics.add.sprite(x, y, 'enemyBall');
-
-
-         // const velocity = new Phaser.Math.Vector2(this.scale.width / 2 - x, this.scale.height / 2 - y).normalize().scale(100);
-         // enemyBall.body.setVelocity(velocity.x, velocity.y);
-
-         // this.enemyBalls.push(enemyBall);
-     }
-
-
-
-
-    // generateEnemyBall() {
+    }
+        // generateEnemyBall() {
     //
     //     console.log('generateEnemyBall')
     //     const x = this.scale.width * 0.1; // calculate the X position of the enemy ball
@@ -165,13 +211,20 @@ export default class GameScene extends Phaser.Scene {
         // Remove the collided balls from their respective arrays and from the scene
         shotBall.destroy();
         enemyBall.destroy();
+
         const shotBallIndex = this.shotBalls.indexOf(shotBall);
         if (shotBallIndex !== -1) {
             this.shotBalls.splice(shotBallIndex, 1);
         }
+
         const enemyBallIndex = this.enemyBalls.indexOf(enemyBall);
         if (enemyBallIndex !== -1) {
             this.enemyBalls.splice(enemyBallIndex, 1);
+        }
+
+        // Check if the shot ball has a physics body before setting the velocity
+        if (shotBall.body instanceof Phaser.Physics.Arcade.Body) {
+            shotBall.body.velocity.set(0);
         }
     }
 
