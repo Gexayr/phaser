@@ -2,9 +2,6 @@
 import Phaser from "phaser";
 const { Scene, Physics } = Phaser;
 const { Sprite } = Physics.Arcade; // Update the import statement
-
-
-
 export default class GameScene extends Phaser.Scene {
 
     private cannon: Phaser.Physics.Arcade.Sprite;
@@ -23,16 +20,16 @@ export default class GameScene extends Phaser.Scene {
 
     preload() {
         // Load any images or assets here.
-        console.log('game.preload')
+        // console.log('game.preload')
 
         this.load.image('background', '../assets/road_background_front_port.png');
         this.load.image('cannon', '../assets/nap.png');
         this.load.image('ball', '../assets/Ball_Blue.png');
-        this.load.image('enemyBall', '../assets/Set3_Ball_Red_volume.png');
+        this.load.image('enemyBall', '../assets/Set3_Ball_red_volume.png');
     }
 
     create() {
-        console.log('game.create')
+        // console.log('game.create')
         // Create our game objects here.
 
         // Center coordinates
@@ -105,7 +102,7 @@ export default class GameScene extends Phaser.Scene {
 
     update() {
         // Called 60 times per second (if your browser/device can handle it)
-        console.log('game.update')
+        // console.log('game.update')
 
         // Get the current mouse or touch position
         const pointer = this.input.activePointer;
@@ -144,7 +141,7 @@ export default class GameScene extends Phaser.Scene {
         this.physics.velocityFromRotation(angle, 500, ball.body.velocity as Phaser.Math.Vector2);
 
         // Set the scale of the ball
-        ball.setScale(0.2); // Adjust the scale value to make the ball smaller
+        // ball.setScale(0.2); // Adjust the scale value to make the ball smaller
         this.shotBalls.push(ball);
 
         if (ball && ball.body) {
@@ -156,7 +153,7 @@ export default class GameScene extends Phaser.Scene {
     generateEnemyBall() {
         const startPoint = this.pathPoints[0]; // Set the initial point of the path
         const enemyBall = this.physics.add.sprite(startPoint.x, startPoint.y, 'enemyBall');
-        enemyBall.setScale(0.2); // Adjust the scale value to make the enemy balls smaller
+        // enemyBall.setScale(0.2); // Adjust the scale value to make the enemy balls smaller
 
         this.physics.world.on('worldstep', () => {
             const targetPoint = this.pathPoints[currentPathIndex]; // Retrieve the target path point
@@ -177,14 +174,16 @@ export default class GameScene extends Phaser.Scene {
             const velocityX = direction.x * speed;
             const velocityY = direction.y * speed;
 
-            enemyBall.setVelocity(velocityX, velocityY);
+            if (enemyBall.body && enemyBall.body.velocity) {
+                enemyBall.setVelocity(velocityX, velocityY);
+            }
         });
 
         let currentPathIndex = 1; // Start at index 1 to move towards the next path point
 
         this.enemyBalls.push(enemyBall);
     }
-        // generateEnemyBall() {
+    // generateEnemyBall() {
     //
     //     console.log('generateEnemyBall')
     //     const x = this.scale.width * 0.1; // calculate the X position of the enemy ball
@@ -221,11 +220,13 @@ export default class GameScene extends Phaser.Scene {
         if (enemyBallIndex !== -1) {
             this.enemyBalls.splice(enemyBallIndex, 1);
         }
+        // console.log("setVelocity")
 
-        // Check if the shot ball has a physics body before setting the velocity
-        if (shotBall.body instanceof Phaser.Physics.Arcade.Body) {
-            shotBall.body.velocity.set(0);
+        if (shotBall.body && shotBall.body.velocity) {
+            // Set the velocity of the shot ball to zero
+            shotBall.setVelocity(0, 0);
         }
+
     }
 
 
@@ -263,3 +264,6 @@ export default class GameScene extends Phaser.Scene {
     //     }
     // }
 }
+
+
+
