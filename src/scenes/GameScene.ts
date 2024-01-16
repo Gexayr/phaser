@@ -13,7 +13,6 @@ export default class GameScene extends Phaser.Scene {
     cannonCooldown: number = 500;
     lastShotTime: number = 0;
 
-
     constructor() {
         super({ key: 'GameScene' });
     }
@@ -24,13 +23,15 @@ export default class GameScene extends Phaser.Scene {
 
         this.load.image('background', '../assets/road_background_front_port.png');
         this.load.image('cannon', '../assets/nap.png');
-        this.load.image('ball', '../assets/Ball_Blue.png');
-        this.load.image('enemyBall', '../assets/Set3_Ball_red_volume.png');
+        this.load.image('ball', '../assets/Set3_Ball_Green_volume.png');
+        this.load.image('enemyBall', '../assets/Set3_Ball_Red_volume.png');
     }
 
     create() {
-        // console.log('game.create')
-        // Create our game objects here.
+
+        // Create a static group with Arcade Physics
+        const staticGroup = this.physics.add.staticGroup();
+
 
         // Center coordinates
         const centerX = this.scale.width * 0.5;
@@ -126,8 +127,13 @@ export default class GameScene extends Phaser.Scene {
             return; // Abort if cannon is not initialized
         }
         // Create a ball sprite at the position of the cannon
-        // const ball = this.add.sprite(this.cannon.x, this.cannon.y, 'ball');
         const ball = this.physics.add.sprite(this.cannon.x, this.cannon.y, 'ball');
+        ball.setScale(0.2); // Adjust the scale value to make the ball smaller
+        ball.body.setCircle(115); // Adjust radius to match ball size
+        // Set sprite origin to center for accurate collisions
+        ball.setOrigin(0.5, 0.5);
+
+
         // Enable physics for the shot ball
         this.physics.world.enable(ball);
         // Set the velocity of the ball to launch it in the direction of the cannon's angle
@@ -141,7 +147,6 @@ export default class GameScene extends Phaser.Scene {
         this.physics.velocityFromRotation(angle, 500, ball.body.velocity as Phaser.Math.Vector2);
 
         // Set the scale of the ball
-        // ball.setScale(0.2); // Adjust the scale value to make the ball smaller
         this.shotBalls.push(ball);
 
         if (ball && ball.body) {
@@ -153,7 +158,10 @@ export default class GameScene extends Phaser.Scene {
     generateEnemyBall() {
         const startPoint = this.pathPoints[0]; // Set the initial point of the path
         const enemyBall = this.physics.add.sprite(startPoint.x, startPoint.y, 'enemyBall');
-        // enemyBall.setScale(0.2); // Adjust the scale value to make the enemy balls smaller
+
+        enemyBall.setScale(0.2); // Adjust the scale value to make the ball smaller
+        enemyBall.body.setCircle(115); // Adjust radius to match ball size
+        enemyBall.setOrigin(0.5, 0.5);
 
         this.physics.world.on('worldstep', () => {
             const targetPoint = this.pathPoints[currentPathIndex]; // Retrieve the target path point
@@ -183,87 +191,10 @@ export default class GameScene extends Phaser.Scene {
 
         this.enemyBalls.push(enemyBall);
     }
-    // generateEnemyBall() {
-    //
-    //     console.log('generateEnemyBall')
-    //     const x = this.scale.width * 0.1; // calculate the X position of the enemy ball
-    //     const y = this.scale.height * 0.1; // calculate the Y position of the enemy ball
-    //     const enemyBall = this.physics.add.sprite(x, y, 'enemyBall');
-    //     this.enemyBalls.push(enemyBall);
-    // }
-
-    // handleCollision(shotBall: Phaser.Physics.Arcade.Sprite, enemyBall: Phaser.Physics.Arcade.Sprite) {
-    //     // Remove the collided balls from their respective arrays and from the scene
-    //     shotBall.destroy();
-    //     enemyBall.destroy();
-    //     const shotBallIndex = this.shotBalls.indexOf(shotBall);
-    //     if (shotBallIndex !== -1) {
-    //         this.shotBalls.splice(shotBallIndex, 1);
-    //     }
-    //     const enemyBallIndex = this.enemyBalls.indexOf(enemyBall);
-    //     if (enemyBallIndex !== -1) {
-    //         this.enemyBalls.splice(enemyBallIndex, 1);
-    //     }
-    // }
 
     handleCollision(shotBall: Phaser.Physics.Arcade.Sprite, enemyBall: Phaser.Physics.Arcade.Sprite) {
-        // Remove the collided balls from their respective arrays and from the scene
-        shotBall.destroy();
-        enemyBall.destroy();
-
-        const shotBallIndex = this.shotBalls.indexOf(shotBall);
-        if (shotBallIndex !== -1) {
-            this.shotBalls.splice(shotBallIndex, 1);
-        }
-
-        const enemyBallIndex = this.enemyBalls.indexOf(enemyBall);
-        if (enemyBallIndex !== -1) {
-            this.enemyBalls.splice(enemyBallIndex, 1);
-        }
-        // console.log("setVelocity")
-
-        if (shotBall.body && shotBall.body.velocity) {
-            // Set the velocity of the shot ball to zero
-            shotBall.setVelocity(0, 0);
-        }
-
+            shotBall.destroy();
+            enemyBall.destroy();
     }
-
-
-
-    // they distance :)
-    // handleCollision(shotBall: Phaser.Physics.Arcade.Sprite, enemyBall: Phaser.Physics.Arcade.Sprite) {
-    //     const distance = Phaser.Math.Distance.Between(shotBall.x, shotBall.y, enemyBall.x, enemyBall.y);
-    //     const threshold = (shotBall.displayWidth + enemyBall.displayWidth) * 0.5;
-    //
-    //     if (distance <= threshold) {
-    //         // Remove the collided balls from their respective arrays and from the scene
-    //         shotBall.destroy();
-    //         enemyBall.destroy();
-    //         const shotBallIndex = this.shotBalls.indexOf(shotBall);
-    //         if (shotBallIndex !== -1) {
-    //             this.shotBalls.splice(shotBallIndex, 1);
-    //         }
-    //         const enemyBallIndex = this.enemyBalls.indexOf(enemyBall);
-    //         if (enemyBallIndex !== -1)
-    //         {
-    //             this.enemyBalls.splice(enemyBallIndex, 1);
-    //         }
-    //     }
-    // }
-
-    // handleCollision(shotBall: Phaser.Physics.Arcade.Sprite, enemyBall: Phaser.Physics.Arcade.Sprite) {
-    //     const overlap = this.physics.overlap(shotBall, enemyBall);
-    //
-    //     if (overlap) {
-    //         shotBall.destroy();
-    //         enemyBall.destroy();
-    //
-    //         this.shotBalls = this.shotBalls.filter(ball => ball !== shotBall);
-    //         this.enemyBalls = this.enemyBalls.filter(ball => ball !== enemyBall);
-    //     }
-    // }
 }
-
-
 

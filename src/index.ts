@@ -13,10 +13,18 @@ const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     parent: "game",
     scene: [PreloadScene, MenuScene, GameScene, GameOverScene],
+    // loader: {
+    //     baseURL: "https://labs.phaser.io",
+    //     crossOrigin: "anonymous"
+    // },
     physics: {
         default: "arcade",
         arcade: {
-            gravity: {y: 0}
+            // tileBias: 10,
+            gravity: {y: 0},
+            // debug: true,
+            // debugShowBody: true,
+            // debugShowStaticBody: true,
         },
     },
 };
