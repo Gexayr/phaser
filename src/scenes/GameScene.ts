@@ -51,15 +51,42 @@ export default class GameScene extends Phaser.Scene {
 
 
         // Define the points that make up the path
-        this.pathPoints = [
-            { x: 100, y: 50 },
-            { x: 600, y: 50 },
-            { x: 600, y: 500 },
-            { x: 200, y: 500 },
-            { x: 200, y: 150 },
-            { x: 500, y: 150 },
-        ];
+        // this.pathPoints = [
+        //     { x: 0, y: 0 },
+        //     { x: 50, y: 100 },
+        //     { x: 100, y: 100 },
+        //     { x: 200, y: 100 },
+        //     { x: 200, y: 200 },
+        //     { x: 100, y: 200 },
+        //     { x: 100, y: 300 },
+        //     { x: 200, y: 300 },
+        // ];
+        //
+        // // Create a curve representing a snake-like path
+        // const snakePath = new Phaser.Curves.Path(0, 0)
+        //     .lineTo(100, 100)
+        //     .lineTo(200, 100)
+        //     .lineTo(200, 200)
+        //     .lineTo(100, 200)
+        //     .lineTo(100, 300)
+        //     .lineTo(200, 300);
 
+// Get points from the curve at a specific resolution
+//         this.pathPoints = snakePath.getSpacedPoints(50); // Adjust resolution as needed
+
+
+        const amplitude = 50; // Adjust the amplitude of the wave
+        const frequency = 0.02; // Adjust the frequency of the wave
+
+        const numPoints = 100; // Number of points in the wave
+
+        this.pathPoints = [];
+
+        for (let i = 0; i < numPoints; i++) {
+            const x = i * (this.scale.width / numPoints);
+            const y = amplitude * Math.sin(frequency * x) + 80; // Adjust the starting y position
+            this.pathPoints.push({ x, y });
+        }
 
 
         for (let i = 0; i < this.pathPoints.length; i++) {
@@ -70,22 +97,6 @@ export default class GameScene extends Phaser.Scene {
                 graphics.lineTo(x, y);
             }
         }
-
-        //
-        //
-        // // Move the graphics object to the first point of the path
-        // const startPoint = pathPoints[0];
-        // graphics.moveTo(startPoint.x, startPoint.y);
-        //
-        // // Draw lines connecting the subsequent points of the path
-        // for (let i = 1; i < pathPoints.length; i++)
-        // {
-        //     const point = pathPoints[i];
-        //     graphics.lineTo(point.x, point.y);
-        // }
-        //
-        // // Close the path by drawing a line back to the start point
-        // graphics.closePath();
 
         // Render the graphics object on top of the background image
         graphics.strokePath();
@@ -156,6 +167,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     generateEnemyBall() {
+
         const startPoint = this.pathPoints[0]; // Set the initial point of the path
         const enemyBall = this.physics.add.sprite(startPoint.x, startPoint.y, 'enemyBall');
 
@@ -165,6 +177,13 @@ export default class GameScene extends Phaser.Scene {
 
         this.physics.world.on('worldstep', () => {
             const targetPoint = this.pathPoints[currentPathIndex]; // Retrieve the target path point
+
+            if (!targetPoint) {
+                // If targetPoint is undefined, it means the enemy ball reached the end of the path
+                enemyBall.destroy();
+                return;
+            }
+
             const direction = new Phaser.Math.Vector2(targetPoint.x - enemyBall.x, targetPoint.y - enemyBall.y);
             const distance = direction.length();
 
