@@ -150,20 +150,11 @@ export default class GameScene extends Phaser.Scene {
         // Set the velocity of the ball to launch it in the direction of the cannon's angle
         const angle = Phaser.Math.DegToRad(this.cannon.angle + 90);
         const velocity = new Phaser.Math.Vector2(Math.cos(angle), Math.sin(angle)).normalize().scale(500);
-
-        // // Set the velocity of the ball to launch it in the direction of the cannon's angle
-        // const angle = Phaser.Math.DegToRad(this.cannon.angle - 30);
-        // const velocity = new Phaser.Math.Vector2(Math.cos(angle), Math.sin(angle)).normalize().scale(500);
-
-        this.physics.velocityFromRotation(angle, 500, ball.body.velocity as Phaser.Math.Vector2);
-
-        // Set the scale of the ball
         this.shotBalls.push(ball);
 
         if (ball && ball.body) {
             ball.body.setVelocity(velocity.x, velocity.y);
         }
-
     }
 
     generateEnemyBall() {
