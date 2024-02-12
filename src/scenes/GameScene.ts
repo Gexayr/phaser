@@ -8,9 +8,10 @@ export default class GameScene extends Phaser.Scene {
     private enemyBalls: Phaser.Physics.Arcade.Sprite[] = [];
     private shotBalls: Phaser.GameObjects.Sprite[] = [];
     private pathPoints: { x: number, y: number }[] = [];
+    private pathGraphics: Phaser.GameObjects.Graphics;  // Declare pathGraphics property
+    private pathPolygon: Phaser.Geom.Polygon;
 
-    cannonRotationSpeed: number = 0.02;
-    cannonCooldown: number = 500;
+    cannonCooldown: number = 300;
     lastShotTime: number = 0;
 
     constructor() {
@@ -19,8 +20,6 @@ export default class GameScene extends Phaser.Scene {
 
     preload() {
         // Load any images or assets here.
-        // console.log('game.preload')
-
         this.load.image('background', '../assets/road_background_front_port.png');
         this.load.image('cannon', '../assets/nap.png');
         this.load.image('ball', '../assets/Set3_Ball_Green_volume.png');
@@ -28,10 +27,6 @@ export default class GameScene extends Phaser.Scene {
     }
 
     create() {
-
-        // Create a static group with Arcade Physics
-        const staticGroup = this.physics.add.staticGroup();
-
 
         // Center coordinates
         const centerX = this.scale.width * 0.5;
@@ -42,38 +37,10 @@ export default class GameScene extends Phaser.Scene {
         background.setScale(this.scale.width / background.width, this.scale.height / background.height);
 
         // Create a graphics object to draw the path
-        const graphics = this.add.graphics();
-
-        // Set the line style for the path
-        const lineColor = 0xf412900;
-        const lineWidth = 10;
-        graphics.lineStyle(lineWidth, lineColor);
-
-
-        // Define the points that make up the path
-        // this.pathPoints = [
-        //     { x: 0, y: 0 },
-        //     { x: 50, y: 100 },
-        //     { x: 100, y: 100 },
-        //     { x: 200, y: 100 },
-        //     { x: 200, y: 200 },
-        //     { x: 100, y: 200 },
-        //     { x: 100, y: 300 },
-        //     { x: 200, y: 300 },
-        // ];
-        //
-        // // Create a curve representing a snake-like path
-        // const snakePath = new Phaser.Curves.Path(0, 0)
-        //     .lineTo(100, 100)
-        //     .lineTo(200, 100)
-        //     .lineTo(200, 200)
-        //     .lineTo(100, 200)
-        //     .lineTo(100, 300)
-        //     .lineTo(200, 300);
-
-// Get points from the curve at a specific resolution
-//         this.pathPoints = snakePath.getSpacedPoints(50); // Adjust resolution as needed
-
+        this.pathGraphics = this.add.graphics();
+        const lineColor = Phaser.Display.Color.GetColor(96, 125, 139); // Adjust RGB values
+        const lineWidth = 8;
+        this.pathGraphics.lineStyle(lineWidth, lineColor);
 
         const amplitude = 50; // Adjust the amplitude of the wave
         const frequency = 0.02; // Adjust the frequency of the wave
@@ -87,20 +54,18 @@ export default class GameScene extends Phaser.Scene {
             const y = amplitude * Math.sin(frequency * x) + 80; // Adjust the starting y position
             this.pathPoints.push({ x, y });
         }
-
+        this.pathPolygon = new Phaser.Geom.Polygon(this.pathPoints.map(point => new Phaser.Geom.Point(point.x, point.y)));
 
         for (let i = 0; i < this.pathPoints.length; i++) {
             const {x, y} = this.pathPoints[i];
             if (i === 0) {
-                graphics.moveTo(x, y);
+                this.pathGraphics.moveTo(x, y);
             } else {
-                graphics.lineTo(x, y);
+                this.pathGraphics.lineTo(x, y);
             }
         }
 
-        // Render the graphics object on top of the background image
-        graphics.strokePath();
-
+        this.pathGraphics.strokePath();
 
         this.cannon = this.physics.add.sprite(centerX, centerY, 'cannon');
         // Set the scale of the cannon
@@ -112,10 +77,11 @@ export default class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.shotBalls, this.enemyBalls, this.handleCollision, null, this);
     }
 
+    isPointInsidePath(x: number, y: number): boolean {
+        return this.pathPolygon.contains(x, y);
+    }
     update() {
         // Called 60 times per second (if your browser/device can handle it)
-        // console.log('game.update')
-
         // Get the current mouse or touch position
         const pointer = this.input.activePointer;
 
@@ -125,15 +91,25 @@ export default class GameScene extends Phaser.Scene {
         // Rotate the cannon towards the pointer
         this.cannon.setAngle(Phaser.Math.RadToDeg(angle - 1.5708));
 
+        // this.shotBalls.forEach((shotBall) => {
+        //     // Check if the shot ball overlaps with the path
+        //     if (this.isPointInsidePath(shotBall.x, shotBall.y)) {
+        //
+        //         // Shot ball reached the path
+        //         this.transformShotBall(shotBall);
+        //     }
+        // });
+
+
         // Shoot balls if the cooldown time has passed and the pointer is pressed
         if (pointer.isDown && this.time.now > this.lastShotTime + this.cannonCooldown) {
             this.shootBall();
             this.lastShotTime = this.time.now;
+
         }
     }
 
     shootBall() {
-
         if (!this.cannon) {
             return; // Abort if cannon is not initialized
         }
@@ -206,5 +182,27 @@ export default class GameScene extends Phaser.Scene {
             shotBall.destroy();
             enemyBall.destroy();
     }
+
+    // transformShotBall(shotBall) {
+    //     // Remove the shot ball from the shotBalls array
+    //     const index = this.shotBalls.indexOf(shotBall);
+    //     if (index !== -1) {
+    //         this.shotBalls.splice(index, 1);
+    //     }
+    //
+    //     // Create a new enemy ball at the position of the shot ball
+    //     const enemyBall = this.physics.add.sprite(shotBall.x, shotBall.y, 'enemyBall');
+    //     enemyBall.setScale(0.2); // Adjust the scale value to make the ball smaller
+    //     enemyBall.body.setCircle(115); // Adjust radius to match ball size
+    //     enemyBall.setOrigin(0.5, 0.5);
+    //
+    //     // Enable physics for the enemy ball
+    //     this.physics.world.enable(enemyBall);
+    //
+    //     // Add the enemy ball to the array for tracking
+    //     this.enemyBalls.push(enemyBall);
+    //     shotBall.destroy();
+    //
+    // }
 }
 

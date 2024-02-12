@@ -21,7 +21,7 @@ module.exports = {
     },
     mode: 'development',
     devServer: {
-        open: true,
+        // open: true,
         port: 8080,
         static: {
             directory: path.join(__dirname, '/'), // rather than contentBase
