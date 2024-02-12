@@ -8,10 +8,19 @@ export default class GameScene extends Phaser.Scene {
     private enemyBalls: Phaser.Physics.Arcade.Sprite[] = [];
     private shotBalls: Phaser.GameObjects.Sprite[] = [];
     private pathPoints: { x: number, y: number }[] = [];
+    private bottomPathPoints: { xb: number, yb: number }[] = [];
     private pathGraphics: Phaser.GameObjects.Graphics;  // Declare pathGraphics property
+    private bottomPathGraphics: Phaser.GameObjects.Graphics;  // Declare bottomPathGraphics property
     private pathPolygon: Phaser.Geom.Polygon;
+    private ballColors: string[] = [
+        'Set3_Ball_Green_volume',
+        'Set3_Ball_Orange_volume',
+        'Set3_Ball_Red_volume',
+        'Set3_Ball_Violet_volume',
+        'Set3_Ball_Yellow_volume'
+    ];
 
-    cannonCooldown: number = 300;
+    cannonCooldown: number = 600;
     lastShotTime: number = 0;
 
     constructor() {
@@ -24,6 +33,9 @@ export default class GameScene extends Phaser.Scene {
         this.load.image('cannon', '../assets/nap.png');
         this.load.image('ball', '../assets/Set3_Ball_Green_volume.png');
         this.load.image('enemyBall', '../assets/Set3_Ball_Red_volume.png');
+        this.ballColors.forEach(color => {
+            this.load.image(color, `../assets/${color}.png`);
+        });
     }
 
     create() {
@@ -38,9 +50,12 @@ export default class GameScene extends Phaser.Scene {
 
         // Create a graphics object to draw the path
         this.pathGraphics = this.add.graphics();
+        this.bottomPathGraphics = this.add.graphics();
+
         const lineColor = Phaser.Display.Color.GetColor(96, 125, 139); // Adjust RGB values
         const lineWidth = 8;
         this.pathGraphics.lineStyle(lineWidth, lineColor);
+        this.bottomPathGraphics.lineStyle(lineWidth, lineColor);
 
         const amplitude = 50; // Adjust the amplitude of the wave
         const frequency = 0.02; // Adjust the frequency of the wave
@@ -48,24 +63,33 @@ export default class GameScene extends Phaser.Scene {
         const numPoints = 100; // Number of points in the wave
 
         this.pathPoints = [];
+        this.bottomPathPoints = [];
 
         for (let i = 0; i < numPoints; i++) {
+
             const x = i * (this.scale.width / numPoints);
             const y = amplitude * Math.sin(frequency * x) + 80; // Adjust the starting y position
+            const xb = i * (this.scale.width + 50 / numPoints);
+            const yb = amplitude * Math.sin(frequency * xb) + 80; // Adjust the starting y position
             this.pathPoints.push({ x, y });
+            this.bottomPathPoints.push({ xb, yb });
         }
         this.pathPolygon = new Phaser.Geom.Polygon(this.pathPoints.map(point => new Phaser.Geom.Point(point.x, point.y)));
 
         for (let i = 0; i < this.pathPoints.length; i++) {
             const {x, y} = this.pathPoints[i];
+            const {xb, yb} = this.bottomPathPoints[i];
             if (i === 0) {
                 this.pathGraphics.moveTo(x, y);
+                this.bottomPathGraphics.moveTo(xb, yb);
             } else {
                 this.pathGraphics.lineTo(x, y);
+                this.bottomPathGraphics.lineTo(xb, yb);
             }
         }
 
         this.pathGraphics.strokePath();
+        this.bottomPathGraphics.strokePath();
 
         this.cannon = this.physics.add.sprite(centerX, centerY, 'cannon');
         // Set the scale of the cannon
@@ -136,7 +160,12 @@ export default class GameScene extends Phaser.Scene {
     generateEnemyBall() {
 
         const startPoint = this.pathPoints[0]; // Set the initial point of the path
-        const enemyBall = this.physics.add.sprite(startPoint.x, startPoint.y, 'enemyBall');
+
+        const randomColor = Phaser.Math.RND.pick(this.ballColors);
+
+        // Create the enemy ball with the chosen color
+        const enemyBall = this.physics.add.sprite(startPoint.x, startPoint.y, randomColor);
+        // const enemyBall = this.physics.add.sprite(startPoint.x, startPoint.y, 'enemyBall');
 
         enemyBall.setScale(0.2); // Adjust the scale value to make the ball smaller
         enemyBall.body.setCircle(115); // Adjust radius to match ball size
