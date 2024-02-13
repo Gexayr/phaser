@@ -234,7 +234,7 @@ export default class GameScene extends Phaser.Scene {
         });
 
         let currentPathIndex = 1; // Start at index 1 to move towards the next path point
-        let currentPathIndexB = 2; // Start at index 1 to move towards the next path point
+        let currentPathIndexB = 1; // Start at index 1 to move towards the next path point
 
         this.enemyBalls.push(enemyBall);
         this.enemyBalls.push(enemyBallBottom);
