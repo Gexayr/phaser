@@ -201,7 +201,7 @@ export default class GameScene extends Phaser.Scene {
             const distance = direction.length();
             const distanceBottom = directionBottom.length();
 
-            const speed = 50; // Adjust the speed of the enemy ball
+            const speed = 80; // Adjust the speed of the enemy ball
 
             if (distance < speed) {
                 currentPathIndex++;
