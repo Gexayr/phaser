@@ -91,8 +91,8 @@ export default class GameScene extends Phaser.Scene {
             }
         }
 
-        this.pathGraphics.strokePath();
-        this.bottomPathGraphics.strokePath();
+        // this.pathGraphics.strokePath();
+        // this.bottomPathGraphics.strokePath();
 
         this.cannon = this.physics.add.sprite(centerX, centerY, 'cannon');
         // Set the scale of the cannon
