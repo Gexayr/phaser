@@ -53,9 +53,10 @@ export default class GameScene extends Phaser.Scene {
         this.bottomPathGraphics = this.add.graphics();
 
         const lineColor = Phaser.Display.Color.GetColor(96, 125, 139); // Adjust RGB values
+        const lineColorBottom = Phaser.Display.Color.GetColor(196, 225, 139); // Adjust RGB values
         const lineWidth = 8;
         this.pathGraphics.lineStyle(lineWidth, lineColor);
-        this.bottomPathGraphics.lineStyle(lineWidth, lineColor);
+        this.bottomPathGraphics.lineStyle(lineWidth, lineColorBottom);
 
         const amplitude = 50; // Adjust the amplitude of the wave
         const frequency = 0.02; // Adjust the frequency of the wave
@@ -69,8 +70,10 @@ export default class GameScene extends Phaser.Scene {
 
             const x = i * (this.scale.width / numPoints);
             const y = amplitude * Math.sin(frequency * x) + 80; // Adjust the starting y position
-            const xb = i * (this.scale.width + 50 / numPoints);
-            const yb = amplitude * Math.sin(frequency * xb) + 80; // Adjust the starting y position
+
+            const xb = i * (this.scale.width / numPoints);
+            const yb = amplitude * Math.sin(frequency * xb) + 500; // Adjust the starting y position
+
             this.pathPoints.push({ x, y });
             this.bottomPathPoints.push({ xb, yb });
         }
@@ -101,9 +104,9 @@ export default class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.shotBalls, this.enemyBalls, this.handleCollision, null, this);
     }
 
-    isPointInsidePath(x: number, y: number): boolean {
-        return this.pathPolygon.contains(x, y);
-    }
+    // isPointInsidePath(x: number, y: number): boolean {
+    //     return this.pathPolygon.contains(x, y);
+    // }
     update() {
         // Called 60 times per second (if your browser/device can handle it)
         // Get the current mouse or touch position
@@ -160,28 +163,43 @@ export default class GameScene extends Phaser.Scene {
     generateEnemyBall() {
 
         const startPoint = this.pathPoints[0]; // Set the initial point of the path
+        const startPointBottom = this.bottomPathPoints[0]; // Set the initial point of the path
 
         const randomColor = Phaser.Math.RND.pick(this.ballColors);
+        const randomColorBottom = Phaser.Math.RND.pick(this.ballColors);
 
         // Create the enemy ball with the chosen color
         const enemyBall = this.physics.add.sprite(startPoint.x, startPoint.y, randomColor);
+        const enemyBallBottom = this.physics.add.sprite(startPointBottom.xb, startPointBottom.yb, randomColorBottom);
         // const enemyBall = this.physics.add.sprite(startPoint.x, startPoint.y, 'enemyBall');
 
         enemyBall.setScale(0.2); // Adjust the scale value to make the ball smaller
         enemyBall.body.setCircle(115); // Adjust radius to match ball size
         enemyBall.setOrigin(0.5, 0.5);
 
+        enemyBallBottom.setScale(0.2); // Adjust the scale value to make the ball smaller
+        enemyBallBottom.body.setCircle(115); // Adjust radius to match ball size
+        enemyBallBottom.setOrigin(0.5, 0.5);
+
         this.physics.world.on('worldstep', () => {
             const targetPoint = this.pathPoints[currentPathIndex]; // Retrieve the target path point
+            const targetPointBottom = this.bottomPathPoints[currentPathIndexB]; // Retrieve the target path point
 
             if (!targetPoint) {
                 // If targetPoint is undefined, it means the enemy ball reached the end of the path
                 enemyBall.destroy();
                 return;
             }
+            if (!targetPointBottom) {
+                // If targetPoint is undefined, it means the enemy ball reached the end of the path
+                enemyBallBottom.destroy();
+                return;
+            }
 
             const direction = new Phaser.Math.Vector2(targetPoint.x - enemyBall.x, targetPoint.y - enemyBall.y);
+            const directionBottom = new Phaser.Math.Vector2(targetPointBottom.xb - enemyBallBottom.x, targetPointBottom.yb - enemyBallBottom.y);
             const distance = direction.length();
+            const distanceBottom = directionBottom.length();
 
             const speed = 50; // Adjust the speed of the enemy ball
 
@@ -192,19 +210,34 @@ export default class GameScene extends Phaser.Scene {
                     return; // Abort if reached the end of the path
                 }
             }
+            if (distanceBottom < speed) {
+                currentPathIndexB++;
+                if (currentPathIndexB >= this.bottomPathPoints.length) {
+                    enemyBallBottom.destroy();
+                    return; // Abort if reached the end of the path
+                }
+            }
 
             direction.normalize();
+            directionBottom.normalize();
             const velocityX = direction.x * speed;
             const velocityY = direction.y * speed;
+            const velocityXB = directionBottom.x * speed;
+            const velocityYB = directionBottom.y * speed;
 
             if (enemyBall.body && enemyBall.body.velocity) {
                 enemyBall.setVelocity(velocityX, velocityY);
             }
+            if (enemyBallBottom.body && enemyBallBottom.body.velocity) {
+                enemyBallBottom.setVelocity(velocityXB, velocityYB);
+            }
         });
 
         let currentPathIndex = 1; // Start at index 1 to move towards the next path point
+        let currentPathIndexB = 2; // Start at index 1 to move towards the next path point
 
         this.enemyBalls.push(enemyBall);
+        this.enemyBalls.push(enemyBallBottom);
     }
 
     handleCollision(shotBall: Phaser.Physics.Arcade.Sprite, enemyBall: Phaser.Physics.Arcade.Sprite) {
