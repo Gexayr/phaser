@@ -58,7 +58,7 @@ export default class GameScene extends Phaser.Scene {
         this.pathGraphics.lineStyle(lineWidth, lineColor);
         this.bottomPathGraphics.lineStyle(lineWidth, lineColorBottom);
 
-        const amplitude = 50; // Adjust the amplitude of the wave
+        const amplitude = 80; // Adjust the amplitude of the wave
         const frequency = 0.02; // Adjust the frequency of the wave
 
         const numPoints = 100; // Number of points in the wave
@@ -100,7 +100,7 @@ export default class GameScene extends Phaser.Scene {
 
         this.physics.world.enable(this.cannon);
 
-        this.time.addEvent({ delay: 1000, callback: this.generateEnemyBall, callbackScope: this, loop: true });
+        this.time.addEvent({ delay: 650, callback: this.generateEnemyBall, callbackScope: this, loop: true });
         this.physics.add.collider(this.shotBalls, this.enemyBalls, this.handleCollision, null, this);
     }
 
