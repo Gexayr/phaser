@@ -29,12 +29,16 @@ export default class GameScene extends Phaser.Scene {
 
     preload() {
         // Load any images or assets here.
-        this.load.image('background', '../assets/road_background_front_port.png');
-        this.load.image('cannon', '../assets/nap.png');
-        this.load.image('ball', '../assets/Set3_Ball_Green_volume.png');
-        this.load.image('enemyBall', '../assets/Set3_Ball_Red_volume.png');
+        // this.load.image('background', '../assets/road_background_front_port.png');
+        // this.load.image('cannon', '../assets/nap.png');
+        // this.load.image('ball', '../assets/Set3_Ball_Green_volume.png');
+        // this.load.image('enemyBall', '../assets/Set3_Ball_Red_volume.png');
+        this.load.image('background', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/road_background_front_port.png');
+        this.load.image('cannon', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/nap.png');
+        this.load.image('ball', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/Set3_Ball_Green_volume.png');
+        this.load.image('enemyBall', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/Set3_Ball_Red_volume.png');
         this.ballColors.forEach(color => {
-            this.load.image(color, `../assets/${color}.png`);
+            this.load.image(color, `https://raw.githubusercontent.com/Gexayr/phaser/main/assets/${color}.png`);
         });
     }
 
