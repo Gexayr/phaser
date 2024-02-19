@@ -165,18 +165,12 @@ export default class GameScene extends Phaser.Scene {
     }
 
     generateEnemyBall() {
-
-        const startPoint = this.pathPoints[0]; // Set the initial point of the path
-        const startPointBottom = this.bottomPathPoints[0]; // Set the initial point of the path
-
+        // Create the enemy ball with the chosen color
         const randomColor = Phaser.Math.RND.pick(this.ballColors);
         const randomColorBottom = Phaser.Math.RND.pick(this.ballColors);
-
-        // Create the enemy ball with the chosen color
-        const enemyBall = this.physics.add.sprite(startPoint.x, startPoint.y, randomColor);
-        const enemyBallBottom = this.physics.add.sprite(startPointBottom.xb, startPointBottom.yb, randomColorBottom);
-        // const enemyBall = this.physics.add.sprite(startPoint.x, startPoint.y, 'enemyBall');
-
+        const enemyBall = this.physics.add.sprite(this.pathPoints[0].x, this.pathPoints[0].y, randomColor);
+        const enemyBallBottom = this.physics.add.sprite(this.bottomPathPoints[0].xb, this.bottomPathPoints[0].yb, randomColorBottom);
+        // Set properties for the enemy ball
         enemyBall.setScale(0.2); // Adjust the scale value to make the ball smaller
         enemyBall.body.setCircle(115); // Adjust radius to match ball size
         enemyBall.setOrigin(0.5, 0.5);
@@ -185,28 +179,34 @@ export default class GameScene extends Phaser.Scene {
         enemyBallBottom.body.setCircle(115); // Adjust radius to match ball size
         enemyBallBottom.setOrigin(0.5, 0.5);
 
+        // Set the path index to 1 to start at the first point of the path
+        let currentPathIndex = 1;
+        let currentPathIndexB = 1;
+
+        // Add the enemy ball to the array for tracking
+        this.enemyBalls.push(enemyBall);
+        this.enemyBalls.push(enemyBallBottom);
+
+        // Handle movement of the enemy ball along the path
         this.physics.world.on('worldstep', () => {
             const targetPoint = this.pathPoints[currentPathIndex]; // Retrieve the target path point
             const targetPointBottom = this.bottomPathPoints[currentPathIndexB]; // Retrieve the target path point
 
-            if (!targetPoint) {
+            if (!targetPoint || !targetPointBottom) {
                 // If targetPoint is undefined, it means the enemy ball reached the end of the path
                 enemyBall.destroy();
-                return;
-            }
-            if (!targetPointBottom) {
-                // If targetPoint is undefined, it means the enemy ball reached the end of the path
                 enemyBallBottom.destroy();
                 return;
             }
 
+            // Calculate direction and distance to the target point
             const direction = new Phaser.Math.Vector2(targetPoint.x - enemyBall.x, targetPoint.y - enemyBall.y);
             const directionBottom = new Phaser.Math.Vector2(targetPointBottom.xb - enemyBallBottom.x, targetPointBottom.yb - enemyBallBottom.y);
             const distance = direction.length();
             const distanceBottom = directionBottom.length();
-
             const speed = 80; // Adjust the speed of the enemy ball
 
+            // Check if the enemy ball reached the target point
             if (distance < speed) {
                 currentPathIndex++;
                 if (currentPathIndex >= this.pathPoints.length) {
@@ -214,6 +214,8 @@ export default class GameScene extends Phaser.Scene {
                     return; // Abort if reached the end of the path
                 }
             }
+
+            // Check if the enemy ball reached the target point
             if (distanceBottom < speed) {
                 currentPathIndexB++;
                 if (currentPathIndexB >= this.bottomPathPoints.length) {
@@ -222,6 +224,7 @@ export default class GameScene extends Phaser.Scene {
                 }
             }
 
+            // Normalize direction and calculate velocity
             direction.normalize();
             directionBottom.normalize();
             const velocityX = direction.x * speed;
@@ -229,6 +232,7 @@ export default class GameScene extends Phaser.Scene {
             const velocityXB = directionBottom.x * speed;
             const velocityYB = directionBottom.y * speed;
 
+            // Set velocity for the enemy ball
             if (enemyBall.body && enemyBall.body.velocity) {
                 enemyBall.setVelocity(velocityX, velocityY);
             }
@@ -236,12 +240,6 @@ export default class GameScene extends Phaser.Scene {
                 enemyBallBottom.setVelocity(velocityXB, velocityYB);
             }
         });
-
-        let currentPathIndex = 1; // Start at index 1 to move towards the next path point
-        let currentPathIndexB = 1; // Start at index 1 to move towards the next path point
-
-        this.enemyBalls.push(enemyBall);
-        this.enemyBalls.push(enemyBallBottom);
     }
 
     handleCollision(shotBall: Phaser.Physics.Arcade.Sprite, enemyBall: Phaser.Physics.Arcade.Sprite) {
