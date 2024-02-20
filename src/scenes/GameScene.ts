@@ -95,9 +95,6 @@ export default class GameScene extends Phaser.Scene {
             }
         }
 
-        // this.pathGraphics.strokePath();
-        // this.bottomPathGraphics.strokePath();
-
         this.cannon = this.physics.add.sprite(centerX, centerY, 'cannon');
         // Set the scale of the cannon
         this.cannon.setScale(0.4); // Adjust the scale value to make the cannon smaller
@@ -121,16 +118,6 @@ export default class GameScene extends Phaser.Scene {
 
         // Rotate the cannon towards the pointer
         this.cannon.setAngle(Phaser.Math.RadToDeg(angle - 1.5708));
-
-        // this.shotBalls.forEach((shotBall) => {
-        //     // Check if the shot ball overlaps with the path
-        //     if (this.isPointInsidePath(shotBall.x, shotBall.y)) {
-        //
-        //         // Shot ball reached the path
-        //         this.transformShotBall(shotBall);
-        //     }
-        // });
-
 
         // Shoot balls if the cooldown time has passed and the pointer is pressed
         if (pointer.isDown && this.time.now > this.lastShotTime + this.cannonCooldown) {
@@ -246,27 +233,5 @@ export default class GameScene extends Phaser.Scene {
             shotBall.destroy();
             enemyBall.destroy();
     }
-
-    // transformShotBall(shotBall) {
-    //     // Remove the shot ball from the shotBalls array
-    //     const index = this.shotBalls.indexOf(shotBall);
-    //     if (index !== -1) {
-    //         this.shotBalls.splice(index, 1);
-    //     }
-    //
-    //     // Create a new enemy ball at the position of the shot ball
-    //     const enemyBall = this.physics.add.sprite(shotBall.x, shotBall.y, 'enemyBall');
-    //     enemyBall.setScale(0.2); // Adjust the scale value to make the ball smaller
-    //     enemyBall.body.setCircle(115); // Adjust radius to match ball size
-    //     enemyBall.setOrigin(0.5, 0.5);
-    //
-    //     // Enable physics for the enemy ball
-    //     this.physics.world.enable(enemyBall);
-    //
-    //     // Add the enemy ball to the array for tracking
-    //     this.enemyBalls.push(enemyBall);
-    //     shotBall.destroy();
-    //
-    // }
 }
 
