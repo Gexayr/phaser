@@ -33,12 +33,14 @@ export default class GameScene extends Phaser.Scene {
         // this.load.image('cannon', '../assets/nap.png');
         // this.load.image('ball', '../assets/Set3_Ball_Green_volume.png');
         // this.load.image('enemyBall', '../assets/Set3_Ball_Red_volume.png');
-        this.load.image('explosion', '../assets/explosion.png');
-        this.load.image('bucket', '../assets/bucket.png');
+        // this.load.image('explosion', '../assets/explosion.png');
+        // this.load.image('bucket', '../assets/bucket.png');
+        // this.load.image('ball', '../assets/ball.png');
+        this.load.image('explosion', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/explosion.png');
+        this.load.image('bucket', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/bucket.png');
         this.load.image('background', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/road_background_front_port.png');
         this.load.image('cannon', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/nap.png');
-        this.load.image('ball', '../assets/ball.png');
-        // this.load.image('ball', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/ball.png');
+        this.load.image('ball', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/ball.png');
         this.load.image('enemyBall', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/Set3_Ball_Red_volume.png');
         this.ballColors.forEach(color => {
             this.load.image(color, `https://raw.githubusercontent.com/Gexayr/phaser/main/assets/${color}.png`);
@@ -94,10 +96,18 @@ export default class GameScene extends Phaser.Scene {
         const endOfPath = this.pathPoints[this.pathPoints.length - 1]; // Get the last point of the path
         const endOfBottomPath = this.bottomPathPoints[this.bottomPathPoints.length - 1]; // Get the last point of the path
 
-        const bucket = this.add.sprite(endOfPath.x, endOfPath.y, 'bucket');
-        const bucketBottom = this.add.sprite(endOfBottomPath.xb, endOfBottomPath.yb, 'bucket');
+        const endOfPath1 = this.pathPoints[0]; // Get the last point of the path
+        const endOfBottomPath1 = this.bottomPathPoints[0]; // Get the last point of the path
+
+        const bucket = this.add.sprite(endOfPath.x - 40, endOfPath.y, 'bucket');
+        const bucket1 = this.add.sprite(endOfPath1.x + 10, endOfPath1.y+10, 'bucket');
+        const bucketBottom = this.add.sprite(endOfBottomPath.xb - 40, endOfBottomPath.yb, 'bucket');
+        const bucketBottom1 = this.add.sprite(endOfBottomPath1.xb + 10, endOfBottomPath1.yb-10, 'bucket');
         bucket.setScale(0.5); // Adjust scale if needed
         bucketBottom.setScale(0.5); // Adjust scale if needed
+        //
+        bucket1.setScale(0.5); // Adjust scale if needed
+        bucketBottom1.setScale(0.5); // Adjust scale if needed
         //
         // for (let i = 0; i < this.pathPoints.length; i++) {
         //     const {x, y} = this.pathPoints[i];
