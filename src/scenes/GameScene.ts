@@ -80,8 +80,8 @@ export default class GameScene extends Phaser.Scene {
             const y = amplitude * Math.sin(frequency * x) + 80; // Adjust the starting y position
 
             const xb = i * (this.scale.width / numPoints);
-            const yb = amplitude * Math.sin(frequency * xb) + 500; // Adjust the starting y position
-
+            // const yb = amplitude * Math.sin(frequency * xb) + 500; // Adjust the starting y position
+            const yb = this.scale.height - amplitude * Math.sin(frequency * xb) - 80; // Adjust the starting y position
             this.pathPoints.push({ x, y });
             this.bottomPathPoints.push({ xb, yb });
         }
