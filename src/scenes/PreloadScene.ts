@@ -17,8 +17,6 @@ export default class PreloadScene extends Phaser.Scene {
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
 
-        console.log(screenWidth,
-screenHeight);
         // Set game dimensions
         const gameWidth = screenWidth;
         const gameHeight = screenHeight;

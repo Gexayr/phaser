@@ -33,9 +33,12 @@ export default class GameScene extends Phaser.Scene {
         // this.load.image('cannon', '../assets/nap.png');
         // this.load.image('ball', '../assets/Set3_Ball_Green_volume.png');
         // this.load.image('enemyBall', '../assets/Set3_Ball_Red_volume.png');
+        this.load.image('explosion', '../assets/explosion.png');
+        this.load.image('bucket', '../assets/bucket.png');
         this.load.image('background', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/road_background_front_port.png');
         this.load.image('cannon', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/nap.png');
-        this.load.image('ball', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/Set3_Ball_Green_volume.png');
+        this.load.image('ball', '../assets/ball.png');
+        // this.load.image('ball', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/ball.png');
         this.load.image('enemyBall', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/Set3_Ball_Red_volume.png');
         this.ballColors.forEach(color => {
             this.load.image(color, `https://raw.githubusercontent.com/Gexayr/phaser/main/assets/${color}.png`);
@@ -87,17 +90,26 @@ export default class GameScene extends Phaser.Scene {
         }
         this.pathPolygon = new Phaser.Geom.Polygon(this.pathPoints.map(point => new Phaser.Geom.Point(point.x, point.y)));
 
-        for (let i = 0; i < this.pathPoints.length; i++) {
-            const {x, y} = this.pathPoints[i];
-            const {xb, yb} = this.bottomPathPoints[i];
-            if (i === 0) {
-                this.pathGraphics.moveTo(x, y);
-                this.bottomPathGraphics.moveTo(xb, yb);
-            } else {
-                this.pathGraphics.lineTo(x, y);
-                this.bottomPathGraphics.lineTo(xb, yb);
-            }
-        }
+        // Create the bucket sprite at the end of the path
+        const endOfPath = this.pathPoints[this.pathPoints.length - 1]; // Get the last point of the path
+        const endOfBottomPath = this.bottomPathPoints[this.bottomPathPoints.length - 1]; // Get the last point of the path
+
+        const bucket = this.add.sprite(endOfPath.x, endOfPath.y, 'bucket');
+        const bucketBottom = this.add.sprite(endOfBottomPath.xb, endOfBottomPath.yb, 'bucket');
+        bucket.setScale(0.5); // Adjust scale if needed
+        bucketBottom.setScale(0.5); // Adjust scale if needed
+        //
+        // for (let i = 0; i < this.pathPoints.length; i++) {
+        //     const {x, y} = this.pathPoints[i];
+        //     const {xb, yb} = this.bottomPathPoints[i];
+        //     if (i === 0) {
+        //         this.pathGraphics.moveTo(x+30, y+30);
+        //         this.bottomPathGraphics.moveTo(xb, yb);
+        //     }/* else {
+        //         this.pathGraphics.lineTo(x, y);
+        //         this.bottomPathGraphics.lineTo(xb, yb);
+        //     }*/
+        // }
 
         this.cannon = this.physics.add.sprite(centerX, centerY, 'cannon');
         // Set the scale of the cannon
@@ -109,9 +121,6 @@ export default class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.shotBalls, this.enemyBalls, this.handleCollision, null, this);
     }
 
-    // isPointInsidePath(x: number, y: number): boolean {
-    //     return this.pathPolygon.contains(x, y);
-    // }
     update() {
         // Called 60 times per second (if your browser/device can handle it)
         // Get the current mouse or touch position
@@ -157,8 +166,24 @@ export default class GameScene extends Phaser.Scene {
 
     generateEnemyBall() {
         // Create the enemy ball with the chosen color
-        const randomColor = Phaser.Math.RND.pick(this.ballColors);
-        const randomColorBottom = Phaser.Math.RND.pick(this.ballColors);
+        let randomColor = Phaser.Math.RND.pick(this.ballColors);
+        let randomColorBottom = Phaser.Math.RND.pick(this.ballColors);
+
+        // Ensure that the color of the new ball is different from the previous one
+        if (this.enemyBalls.length > 0) {
+            const prevBallColor = this.enemyBalls[this.enemyBalls.length - 1].texture.key;
+            const prevBottomBallColor = this.enemyBalls[this.enemyBalls.length - 2].texture.key;
+
+            // Loop until the new color is different from the previous one
+            while (randomColor === prevBallColor || randomColor === prevBottomBallColor) {
+                randomColor = Phaser.Math.RND.pick(this.ballColors);
+            }
+
+            // Loop until the new color is different from the previous one
+            while (randomColorBottom === prevBallColor || randomColorBottom === prevBottomBallColor || randomColorBottom === randomColor) {
+                randomColorBottom = Phaser.Math.RND.pick(this.ballColors);
+            }
+        }
         const enemyBall = this.physics.add.sprite(this.pathPoints[0].x, this.pathPoints[0].y, randomColor);
         const enemyBallBottom = this.physics.add.sprite(this.bottomPathPoints[0].xb, this.bottomPathPoints[0].yb, randomColorBottom);
         // Set properties for the enemy ball
@@ -234,7 +259,17 @@ export default class GameScene extends Phaser.Scene {
     }
 
     handleCollision(shotBall: Phaser.Physics.Arcade.Sprite, enemyBall: Phaser.Physics.Arcade.Sprite) {
-            shotBall.destroy();
+
+        // Add an explosion animation when the balls collide
+        const explosion = this.add.sprite(enemyBall.x, enemyBall.y, 'explosion');
+        explosion.setScale(0.4);
+        explosion.play('explode'); // Assuming you have an animation called 'explode'
+
+        setTimeout(() => {
+            explosion.destroy();
+        }, 30); // 30 milliseconds = 0.03 seconds
+
+        shotBall.destroy();
             enemyBall.destroy();
     }
 }
