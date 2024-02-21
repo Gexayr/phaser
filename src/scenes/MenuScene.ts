@@ -1,4 +1,3 @@
-// @ts-ignore
 import Phaser from "phaser";
 
 export default class MenuScene extends Phaser.Scene {
@@ -9,61 +8,42 @@ export default class MenuScene extends Phaser.Scene {
     }
 
     preload() {
-        console.log('menu.preload')
-
-        // Load the play button image
-
-        // If you have additional assets such as audio or other images, load them in the same way:
-        // this.load.audio('backgroundMusic', 'assets/audio/backgroundMusic.mp3');
-        // this.load.spritesheet('player', 'assets/sprites/player.png');
+        // Load any necessary assets here
+        this.load.image('background', 'https://raw.githubusercontent.com/Gexayr/phaser/main/assets/road_background_front_port.png');
     }
 
     create() {
-        console.log('menu.create')
-        this.add.image(400, 300, 'background');
-        const playButton = document.getElementById('playButton') as HTMLButtonElement;
+        // Get screen dimensions
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
 
-        // Create a Phaser Text object based on the HTML button
-        this.playButton = this.add.text(playButton.offsetLeft, playButton.offsetTop, playButton.innerText, { color: '#0f0' })
+        // Set game dimensions
+        const gameWidth = screenWidth;
+        const gameHeight = screenHeight;
+
+        // Resize the game canvas
+        this.scale.resize(gameWidth, gameHeight);
+
+        // Add background image
+        const background = this.add.image(gameWidth / 2, gameHeight / 2, 'background');
+        background.displayWidth = gameWidth;
+        background.displayHeight = gameHeight;
+
+        // Create the play button text
+        this.playButton = this.add.text(gameWidth / 2, gameHeight / 2, 'Play Game', { color: '#0f0' })
             .setInteractive()
             .on('pointerdown', () => this.startGame());
 
-
         // Center the play button
-        Phaser.Display.Align.In.Center(
-            this.playButton,
-            this.add.zone(400, 300, 800, 600)
-        );
+        this.playButton.setOrigin(0.5);
 
-
-        // // Create the play button using the loaded image
-        // this.playButton = this.add.image(400, 300, 'playButton').setInteractive();
-        //
-        // // When the play button is clicked, start the game
-        // this.playButton.on('pointerdown', () => this.startGame());
-
-
-        // Create the text for the play button
-        this.playButton = this.add.text(400, 300, 'Play Game', { color: '#0f0' })
-            .setInteractive()    // Makes the text clickable
-            .on('pointerdown', () => this.startGame());   // Go to startGame() when the text is clicked
-
-        // Center the play button
-        Phaser.Display.Align.In.Center(
-            this.playButton,
-            this.add.zone(400, 300, 800, 600)
-        );
+        // Adjust the font size based on the screen size
+        const fontSize = Math.min(gameWidth * 0.05, gameHeight * 0.05);
+        this.playButton.setFontSize(fontSize);
     }
 
-    update() {
-        // We don't need to constantly update anything for the menu
-    }
-
-    // Function to start the game
     startGame() {
-
-        console.log('startGame')
-
-        this.scene.start('GameScene');   // Switch the scene to GameScene
+        // Switch to the GameScene
+        this.scene.start('GameScene');
     }
 }

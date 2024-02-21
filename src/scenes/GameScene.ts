@@ -48,6 +48,10 @@ export default class GameScene extends Phaser.Scene {
         const centerX = this.scale.width * 0.5;
         const centerY = this.scale.height * 0.5;
 
+        // Initialize cannon object
+        this.cannon = this.physics.add.sprite(centerX, centerY, 'cannon');
+
+
         // Load and display the background image
         const background = this.add.image(0, 0, 'background').setOrigin(0, 0);
         background.setScale(this.scale.width / background.width, this.scale.height / background.height);
