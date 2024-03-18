@@ -1,10 +1,7 @@
 // @ts-ignore
 import Phaser from "phaser";
 import GameScene from "./scenes/GameScene";
-import PreloadScene from "./scenes/PreloadScene";
 import MenuScene from "./scenes/MenuScene";
-import GameOverScene from "./scenes/GameOverScene";
-
 
 const config: Phaser.Types.Core.GameConfig = {
     title: "Zuma Game",
@@ -12,7 +9,7 @@ const config: Phaser.Types.Core.GameConfig = {
     height: 600,
     type: Phaser.AUTO,
     parent: "game",
-    scene: [PreloadScene, MenuScene, GameScene, GameOverScene],
+    scene: [MenuScene, GameScene],
     // loader: {
     //     baseURL: "https://labs.phaser.io",
     //     crossOrigin: "anonymous"

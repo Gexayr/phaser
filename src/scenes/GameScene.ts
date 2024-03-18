@@ -3,6 +3,8 @@ import Phaser from "phaser";
 const { Scene, Physics } = Phaser;
 const { Sprite } = Physics.Arcade; // Update the import statement
 export default class GameScene extends Phaser.Scene {
+    // @ts-ignore
+    private socket: SocketIOClient.Socket;
 
     private cannon: Phaser.Physics.Arcade.Sprite;
     private enemyBalls: Phaser.Physics.Arcade.Sprite[] = [];
@@ -27,6 +29,11 @@ export default class GameScene extends Phaser.Scene {
         super({ key: 'GameScene' });
     }
 
+    init(data: any) {
+        // Retrieve the socket object passed from the MenuScene
+        this.socket = data.socket;
+
+    }
     preload() {
         // Load any images or assets here.
         // this.load.image('background', '../assets/road_background_front_port.png');
@@ -49,6 +56,9 @@ export default class GameScene extends Phaser.Scene {
 
     create() {
 
+
+        // console.log("this.socket".repeat(10))
+        // console.log(socket)
         // Center coordinates
         const centerX = this.scale.width * 0.5;
         const centerY = this.scale.height * 0.5;

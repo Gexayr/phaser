@@ -2,7 +2,8 @@
   "compilerOptions": {
     "outDir": "./dist",
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": ["node", "socket.io-client"]
   },
   "include": [
     "src/**/*.ts"
