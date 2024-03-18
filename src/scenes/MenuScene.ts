@@ -6,11 +6,11 @@ export default class MenuScene extends Phaser.Scene {
     // @ts-ignore
     private socket: SocketIOClient.Socket;
     private userData:null;
-    private uid: string | null; // Store the UID obtained from the backend
+    private uuid: string | null; // Store the UID obtained from the backend
 
     constructor() {
         super({ key: 'MenuScene' });
-        this.uid = null;
+        this.uuid = null;
     }
 
     preload() {
@@ -59,10 +59,10 @@ export default class MenuScene extends Phaser.Scene {
 
 
             // Check if the UID exists in local storage
-            this.uid = localStorage.getItem('uid');
+            this.uuid = localStorage.getItem('uuid');
 
             // If the UID doesn't exist, send a request to the backend to initialize the user
-            if (!this.uid) {
+            if (!this.uuid) {
                 this.initUser();
             }
 
@@ -74,11 +74,15 @@ export default class MenuScene extends Phaser.Scene {
 
     initUser() {
         // Send a request to the backend to initialize the user
-        this.socket.emit('initUser', null, (response: { uid: string }) => {
+        this.socket.emit('initUser', null, (response: { uuid: string }) => {
             // Receive the generated UID from the backend
-            this.uid = response.uid;
+            this.uuid = response.uuid;
             // Save the UID to local storage for future use
-            localStorage.setItem('uid', this.uid);
+            localStorage.setItem('uuid', this.uuid);
+        });
+
+        this.socket.on('userData', (response: any) => {
+            console.log('Socket.IO userData:', response);
         });
     }
 
