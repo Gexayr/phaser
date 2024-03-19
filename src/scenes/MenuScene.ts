@@ -50,39 +50,22 @@ export default class MenuScene extends Phaser.Scene {
         // Establish Socket.IO connection
         this.socket = io('http://localhost:8010');
         this.socket.on('connect', () => {
-
-
             console.log('Socket.IO connection established');
-            // Perform any initial actions upon successful connection
-
-            // this.socket.emit('getUserInfo', this.userData);
-
-
             // Check if the UID exists in local storage
             this.uuid = localStorage.getItem('uuid');
+            console.log("this.uuid - " . repeat(10))
+            console.log(this.uuid)
+            this.socket.emit('initUser', this.uuid);
 
-            // If the UID doesn't exist, send a request to the backend to initialize the user
-            if (!this.uuid) {
-                this.initUser();
-            }
-
-        });
-        this.socket.on('error', (error: any) => {
-            console.error('Socket.IO error:', error);
-        });
-    }
-
-    initUser() {
-        // Send a request to the backend to initialize the user
-        this.socket.emit('initUser', null, (response: { uuid: string }) => {
-            // Receive the generated UID from the backend
-            this.uuid = response.uuid;
-            // Save the UID to local storage for future use
-            localStorage.setItem('uuid', this.uuid);
         });
 
         this.socket.on('userData', (response: any) => {
             console.log('Socket.IO userData:', response);
+
+        });
+
+        this.socket.on('error', (error: any) => {
+            console.error('Socket.IO error:', error);
         });
     }
 
