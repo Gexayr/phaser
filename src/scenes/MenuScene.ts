@@ -53,15 +53,15 @@ export default class MenuScene extends Phaser.Scene {
             console.log('Socket.IO connection established');
             // Check if the UID exists in local storage
             this.uuid = localStorage.getItem('uuid');
-            console.log("this.uuid - " . repeat(10))
             console.log(this.uuid)
             this.socket.emit('initUser', this.uuid);
-
         });
 
         this.socket.on('userData', (response: any) => {
+            if (!!response?.uuid){
+                localStorage.setItem('uuid', response?.uuid);
+            }
             console.log('Socket.IO userData:', response);
-
         });
 
         this.socket.on('error', (error: any) => {
