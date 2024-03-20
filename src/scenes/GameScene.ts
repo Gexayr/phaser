@@ -5,6 +5,8 @@ const { Sprite } = Physics.Arcade; // Update the import statement
 export default class GameScene extends Phaser.Scene {
     // @ts-ignore
     private socket: SocketIOClient.Socket;
+    private balance: Phaser.GameObjects.Text;
+    private username: Phaser.GameObjects.Text;
 
     private cannon: Phaser.Physics.Arcade.Sprite;
     private enemyBalls: Phaser.Physics.Arcade.Sprite[] = [];
@@ -32,7 +34,10 @@ export default class GameScene extends Phaser.Scene {
     init(data: any) {
         // Retrieve the socket object passed from the MenuScene
         this.socket = data.socket;
+        this.balance = data.balance;
+        this.username = data.username;
 
+        console.log(data)
     }
     preload() {
         // Load any images or assets here.
@@ -56,16 +61,9 @@ export default class GameScene extends Phaser.Scene {
 
     create() {
 
-
-        // console.log("this.socket".repeat(10))
-        // console.log(socket)
         // Center coordinates
         const centerX = this.scale.width * 0.5;
         const centerY = this.scale.height * 0.5;
-
-        // Initialize cannon object
-        this.cannon = this.physics.add.sprite(centerX, centerY, 'cannon');
-
 
         // Load and display the background image
         const background = this.add.image(0, 0, 'background').setOrigin(0, 0);
@@ -136,6 +134,9 @@ export default class GameScene extends Phaser.Scene {
         this.cannon.setScale(0.4); // Adjust the scale value to make the cannon smaller
 
         this.physics.world.enable(this.cannon);
+
+        this.balance = this.add.text(centerX, centerY + 100, `Balance: ${this.balance}`, { fontSize: '24px' });
+        this.balance.setOrigin(0.5);
 
         this.time.addEvent({ delay: 650, callback: this.generateEnemyBall, callbackScope: this, loop: true });
         this.physics.add.collider(this.shotBalls, this.enemyBalls, this.handleCollision, null, this);

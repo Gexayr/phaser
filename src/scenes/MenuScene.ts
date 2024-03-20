@@ -7,6 +7,9 @@ export default class MenuScene extends Phaser.Scene {
     private socket: SocketIOClient.Socket;
     private userData:null;
     private uuid: string | null; // Store the UID obtained from the backend
+    // Create text objects for displaying user balance and username
+    private userBalance: Phaser.GameObjects.Text;
+    private username: Phaser.GameObjects.Text;
 
     constructor() {
         super({ key: 'MenuScene' });
@@ -56,8 +59,9 @@ export default class MenuScene extends Phaser.Scene {
         this.playButton.setFontSize(fontSize);
 
         // Create text objects for displaying user balance and username
-        const balanceText = this.add.text(gameWidth / 2, gameHeight / 2 + 50, 'Balance: ', { color: '#0f0' });
-        balanceText.setOrigin(0.5);
+        const userBalanceText = this.add.text(gameWidth / 2, gameHeight / 2 + 50, 'Balance: ', { color: '#0f0' });
+        userBalanceText.setOrigin(0.5);
+
 
         const usernameText = this.add.text(gameWidth / 2, gameHeight / 2 + 100, 'Username: ', { color: '#0f0' });
         usernameText.setOrigin(0.5);
@@ -79,10 +83,12 @@ export default class MenuScene extends Phaser.Scene {
             console.log('Socket.IO userData:', response);
             // Update balance and username text based on received data
             if (!!response?.balance) {
-                balanceText.setText(`Balance: ${response?.balance}`);
+                userBalanceText.setText(`Balance: ${response?.balance}`);
+                this.userBalance = response?.balance
             }
             if (!!response?.username) {
                 usernameText.setText(`Username: ${response?.username}`);
+                this.username = response?.username;
             }
         });
 
@@ -94,6 +100,7 @@ export default class MenuScene extends Phaser.Scene {
 
     startGame() {
         // Switch to the GameScene
-        this.scene.start('GameScene', { socket: this.socket }); // Pass the Socket.IO instance to the GameScene
+        // this.scene.start('GameScene', { socket: this.socket }); // Pass the Socket.IO instance to the GameScene
+        this.scene.start('GameScene', { socket: this.socket, balance : this.userBalance, username : this.username });
     }
 }
