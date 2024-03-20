@@ -5,8 +5,12 @@ const { Sprite } = Physics.Arcade; // Update the import statement
 export default class GameScene extends Phaser.Scene {
     // @ts-ignore
     private socket: SocketIOClient.Socket;
-    private balance: Phaser.GameObjects.Text;
-    private username: Phaser.GameObjects.Text;
+    private balance: number;
+    private balanceText: Phaser.GameObjects.Text;
+    private username: string;
+    private usernameText: Phaser.GameObjects.Text;
+    private points: number;
+    private uuid: string;
 
     private cannon: Phaser.Physics.Arcade.Sprite;
     private enemyBalls: Phaser.Physics.Arcade.Sprite[] = [];
@@ -34,10 +38,10 @@ export default class GameScene extends Phaser.Scene {
     init(data: any) {
         // Retrieve the socket object passed from the MenuScene
         this.socket = data.socket;
+        this.uuid = localStorage.getItem('uuid');
         this.balance = data.balance;
         this.username = data.username;
-
-        console.log(data)
+        this.points = 10;
     }
     preload() {
         // Load any images or assets here.
@@ -135,8 +139,8 @@ export default class GameScene extends Phaser.Scene {
 
         this.physics.world.enable(this.cannon);
 
-        this.balance = this.add.text(centerX, centerY + 100, `Balance: ${this.balance}`, { fontSize: '24px' });
-        this.balance.setOrigin(0.5);
+        this.balanceText = this.add.text(centerX, centerY + 100, `Balance: ${this.balance}`, { fontSize: '22px' });
+        this.balanceText.setOrigin(0.5);
 
         this.time.addEvent({ delay: 650, callback: this.generateEnemyBall, callbackScope: this, loop: true });
         this.physics.add.collider(this.shotBalls, this.enemyBalls, this.handleCollision, null, this);
@@ -183,6 +187,25 @@ export default class GameScene extends Phaser.Scene {
         if (ball && ball.body) {
             ball.body.setVelocity(velocity.x, velocity.y);
         }
+
+        // Subtract 10 points from the balance
+        this.updateBalance(this.points);
+
+        // Emit the updated balance to the backend via socket
+        this.emitBet();
+    }
+
+    updateBalance(points: number) {
+        // Update the balance locally
+        this.balance -= points;
+
+        // Update the balance text
+        this.balanceText.setText(`Balance: ${this.balance}`);
+    }
+
+    emitBet() {
+        // Emit the updated balance to the backend via socket
+        this.socket.emit('bet', { uuid: this.uuid, step: 1, balance: this.balance });
     }
 
     generateEnemyBall() {
