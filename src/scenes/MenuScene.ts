@@ -78,11 +78,13 @@ export default class MenuScene extends Phaser.Scene {
 
         this.socket.on('userData', (response: any) => {
             if (!!response?.uuid){
-                localStorage.setItem('uuid', response?.uuid);
+                localStorage.setItem('uuid', response?.id + ':' + response?.uuid);
             }
             console.log('Socket.IO userData:', response);
             // Update balance and username text based on received data
             if (!!response?.balance) {
+                console.log("response")
+                console.log(response)
                 userBalanceText.setText(`Balance: ${response?.balance}`);
                 this.userBalance = response?.balance
             }

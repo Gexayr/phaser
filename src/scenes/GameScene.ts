@@ -10,6 +10,7 @@ export default class GameScene extends Phaser.Scene {
     private username: string;
     private usernameText: Phaser.GameObjects.Text;
     private points: number;
+    private step: number;
     private uuid: string;
 
     private cannon: Phaser.Physics.Arcade.Sprite;
@@ -42,6 +43,7 @@ export default class GameScene extends Phaser.Scene {
         this.balance = data.balance;
         this.username = data.username;
         this.points = 10;
+        this.step = 1;
     }
     preload() {
         // Load any images or assets here.
@@ -188,24 +190,24 @@ export default class GameScene extends Phaser.Scene {
             ball.body.setVelocity(velocity.x, velocity.y);
         }
 
-        // Subtract 10 points from the balance
         this.updateBalance(this.points);
-
-        // Emit the updated balance to the backend via socket
-        this.emitBet();
     }
 
     updateBalance(points: number) {
         // Update the balance locally
         this.balance -= points;
-
         // Update the balance text
         this.balanceText.setText(`Balance: ${this.balance}`);
     }
 
+    updateUserData() {
+        this.socket.on('updateUserData', (user: any) => {
+            this.updateBalance(user.balance)
+        });
+    }
     emitBet() {
-        // Emit the updated balance to the backend via socket
-        this.socket.emit('bet', { uuid: this.uuid, step: 1, balance: this.balance });
+        this.socket.emit('bet', { uuid: this.uuid, step: this.step, balance: this.balance });
+        this.updateUserData();
     }
 
     generateEnemyBall() {
@@ -314,7 +316,9 @@ export default class GameScene extends Phaser.Scene {
         }, 30); // 30 milliseconds = 0.03 seconds
 
         shotBall.destroy();
-            enemyBall.destroy();
+        enemyBall.destroy();
+
+        this.emitBet();
     }
 }
 
