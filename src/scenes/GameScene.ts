@@ -9,7 +9,7 @@ export default class GameScene extends Phaser.Scene {
     private balanceText: Phaser.GameObjects.Text;
     private username: string;
     private usernameText: Phaser.GameObjects.Text;
-    private points: number;
+    private amount: number;
     private step: number;
     private uuid: string;
 
@@ -42,7 +42,7 @@ export default class GameScene extends Phaser.Scene {
         this.uuid = localStorage.getItem('uuid');
         this.balance = data.balance;
         this.username = data.username;
-        this.points = 10;
+        this.amount = 10;
         this.step = 1;
     }
     preload() {
@@ -146,6 +146,10 @@ export default class GameScene extends Phaser.Scene {
 
         this.time.addEvent({ delay: 650, callback: this.generateEnemyBall, callbackScope: this, loop: true });
         this.physics.add.collider(this.shotBalls, this.enemyBalls, this.handleCollision, null, this);
+
+        this.socket.on('updateUserData', (user: any) => {
+            this.balanceText.setText(`Balance: ${user.balance}`);
+        });
     }
 
     update() {
@@ -190,24 +194,10 @@ export default class GameScene extends Phaser.Scene {
             ball.body.setVelocity(velocity.x, velocity.y);
         }
 
-        this.updateBalance(this.points);
-    }
-
-    updateBalance(points: number) {
         // Update the balance locally
-        this.balance -= points;
+        this.balance = this.balance - this.amount;
         // Update the balance text
         this.balanceText.setText(`Balance: ${this.balance}`);
-    }
-
-    updateUserData() {
-        this.socket.on('updateUserData', (user: any) => {
-            this.updateBalance(user.balance)
-        });
-    }
-    emitBet() {
-        this.socket.emit('bet', { uuid: this.uuid, step: this.step, balance: this.balance });
-        this.updateUserData();
     }
 
     generateEnemyBall() {
@@ -318,7 +308,8 @@ export default class GameScene extends Phaser.Scene {
         shotBall.destroy();
         enemyBall.destroy();
 
-        this.emitBet();
+        this.socket.emit('bet', { uuid: this.uuid, step: this.step, balance: this.balance });
+
     }
 }
 
